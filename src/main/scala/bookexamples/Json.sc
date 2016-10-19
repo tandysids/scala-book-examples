@@ -5,8 +5,8 @@ object Json extends App {
     def write(data: A): JsValue[A]
   }
 
-  object JsUtil {
-    def toJson[A](data: A) (implicit writer: JsWriter[A]): JsValue = {
+  implicit class JsUtil[A](data: A) {
+    def toJson[A] (implicit writer: JsWriter[A]): JsValue = {
       writer.write(data)
     }
   }
@@ -40,9 +40,14 @@ object Json extends App {
     }
   }
 
-  implicit object VisitorWriter extends JsWriter[Visitor] { def write(value: Visitor) = value match {
-    case anon: Anonymous => JsUtil.toJson(anon)
-    case user: User => JsUtil.toJson(user) }
+  implicit object VisitorWriter extends JsWriter[Visitor] {
+    def write(value: Visitor) = value match {
+    case anon: Anonymous =>
+      import AnonymousWriter._
+      anon.toJson
+    case user: User =>
+      import UserWriter._
+      user.toJson}
   }
 
 
